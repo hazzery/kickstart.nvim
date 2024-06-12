@@ -209,6 +209,7 @@ require('lazy').setup({
           },
         },
       }
+      vim.api.nvim_set_keymap('n', '<leader>vd', ':Neogen<cr>', { noremap = true, silent = true })
     end,
   },
 

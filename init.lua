@@ -195,6 +195,23 @@ require('lazy').setup({
     },
   },
 
+  { -- NeoGen, allows automatic documentation/annotations (docstring/javadoc)
+    'danymat/neogen',
+    config = function()
+      require('neogen').setup {
+        enabled = true,
+        input_after_comment = true,
+        languages = {
+          python = {
+            template = {
+              annotation_convention = 'reST',
+            },
+          },
+        },
+      }
+    end,
+  },
+
   -- Use `opts = {}` to force a plugin to be loaded.
   --
   --  This is equivalent to:

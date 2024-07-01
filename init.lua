@@ -143,13 +143,76 @@ vim.opt.rtp:prepend(lazypath)
 --
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
-  -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
+  -- NOTE: Plugins can be added with a link (or for a GitHub repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
-  -- keys can be used to configure plugin behavior/loading/etc.
+  -- keys can be used to configure plugin behaviour/loading/etc.
   --
+  { -- Otter pulls treesitter injections into separate buffers, allowing for code completions
+    'jmbuhr/otter.nvim',
+    opts = {
+      lsp = {
+        hover = {
+          border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
+        },
+        -- `:h events` that cause the diagnostics to update. Set to:
+        -- { "BufWritePost", "InsertLeave", "TextChanged" } for less performant
+        -- but more instant diagnostic updates
+        diagnostic_update_events = { 'BufWritePost' },
+      },
+      buffers = {
+        -- if set to true, the file type of the otter buffers will be set.
+        -- otherwise only the autocommand of lspconfig that attaches
+        -- the language server will be executed without setting the file type
+        set_filetype = false,
+        -- write <path>.otter.<embedded language extension> files
+        -- to disk on save of main buffer.
+        -- useful for some linters that require actual files
+        -- otter files are deleted on quit or main buffer close
+        write_to_disk = false,
+      },
+      strip_wrapping_quote_characters = { "'", '"', '`' },
+      -- Otter may not work the way you expect when entire code blocks are indented (eg. in Org files)
+      -- When true, otter handles these cases fully. This is a (minor) performance hit
+      handle_leading_whitespace = true,
+    },
+  },
+
+  {
+    'linux-cultist/venv-selector.nvim',
+    branch = 'regexp',
+    ft = 'py',
+    dependencies = { 'neovim/nvim-lspconfig', 'nvim-telescope/telescope.nvim' },
+    lazy = false,
+    config = function()
+      require('venv-selector').setup()
+    end,
+    keys = {
+      -- Keymap to open VenvSelector to pick a venv.
+      { '<leader>vs', '<cmd>VenvSelect<cr>' },
+    },
+  },
+
+  { -- NeoGen, allows automatic documentation/annotations (docstring/javadoc)
+    'danymat/neogen',
+    config = function()
+      require('neogen').setup {
+        enabled = true,
+        input_after_comment = true,
+        languages = {
+          python = {
+            template = {
+              annotation_convention = 'reST',
+            },
+          },
+        },
+      }
+      vim.api.nvim_set_keymap('n', '<leader>vd', ':Neogen<cr>', { noremap = true, silent = true })
+    end,
+  },
+
   -- Use `opts = {}` to force a plugin to be loaded.
   --
   --  This is equivalent to:
@@ -686,6 +749,7 @@ require('lazy').setup({
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
           { name = 'path' },
+          { name = 'otter' },
         },
       }
     end,
@@ -764,6 +828,9 @@ require('lazy').setup({
         additional_vim_regex_highlighting = { 'ruby' },
       },
       indent = { enable = true, disable = { 'ruby' } },
+      inject = {
+        enable = true,
+      },
     },
     config = function(_, opts)
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
